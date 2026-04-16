@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-landing-page">
+    <div class="auth-bg-pattern"></div>
+    <div class="auth-landing-inner container">
+        <div class="landing-header">
+            <a href="{% url 'wellness:auth' %}" class="sidebar-logo logo-centered">
+                <span class="logo-icon">🌸</span>
+                <span class="logo-text" >Mental Wellness</span>
+            </a>
+        </div>
+
+        <div class="quote-panel quote-panel-enhanced">
+            <h2 class="welcome-title">Welcome</h2>
+            <blockquote class="welcome-quote">"The bravest thing you can do is keep going one small step at a time. You're doing better than you think."</blockquote>
+            <p class="quote-author">— A Friend</p>
+            <p class="quote-hint">Choose your role and sign in to access your personalized experience.</p>
+        </div>
+
+        <div class="role-selector">
+            <h3>I am a...</h3>
+            <div class="role-cards">
+                <div class="role-card role-patient">
+                    <div class="role-icon">👤</div>
+                    <h4>Patient / User</h4>
+                    <p>Track your wellness, complete surveys, and view doctor recommendations</p>
+                    <div class="role-actions">
+                        <a href="{% url 'wellness:login' %}" class="btn btn-primary">Sign In</a>
+                        <a href="{% url 'wellness:signup' %}" class="btn btn-outline">Create Account</a>
+                    </div>
+                </div>
+                <div class="role-card role-doctor">
+                    <div class="role-icon">🩺</div>
+                    <h4>Doctor</h4>
+                    <p>View patients, their thoughts and surveys, and provide recovery suggestions</p>
+                    <div class="role-actions">
+                        <a href="{% url 'wellness:doctor_login' %}" class="btn btn-secondary">Doctor Sign In</a>
+                        <a href="{% url 'wellness:doctor_signup' %}" class="btn btn-outline">Register as Doctor</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

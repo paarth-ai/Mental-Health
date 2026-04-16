@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-page auth-page-styled">
+    <div class="auth-bg-pattern"></div>
+    <div class="auth-form-wrapper">
+        <h1>Doctor Sign In</h1>
+        <p class="intro">Enter your doctor credentials to access the patient dashboard and provide recovery suggestions.</p>
+
+        <form method="post" action="{% url 'wellness:doctor_login' %}" class="auth-form auth-form-aligned">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group form-group-aligned">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<span class="error">{{ field.errors.0 }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Doctor Sign In</button>
+            </div>
+        </form>
+
+        <p class="auth-footer">
+            Not registered? <a href="{% url 'wellness:doctor_signup' %}">Register as Doctor</a> •
+            <a href="{% url 'wellness:auth' %}">Back to welcome</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

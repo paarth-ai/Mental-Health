@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+    <h1>🌸 Mental Wellness Check</h1>
+    <p class="lead">A short, confidential survey to help identify signs of emotional distress using evidence-based psychological indicators.</p>
+    <p class="disclaimer">Your responses are stored locally and used only to show you a summary and recommendations. This is not a diagnosis.</p>
+    {% if user.is_authenticated %}
+        <div class="hero-actions">
+            <a href="{% url 'wellness:survey' %}" class="btn btn-primary">📋 Take the Survey</a>
+            <a href="{% url 'wellness:games' %}" class="btn btn-secondary">🎮 Mental Health Games</a>
+        </div>
+        <div class="quick-links">
+            <a href="{% url 'wellness:survey_history' %}" class="btn btn-outline">Survey History</a>
+            <a href="{% url 'wellness:thought_journal' %}" class="btn btn-outline">✍️ Write Thoughts</a>
+            <a href="{% url 'wellness:thought_history' %}" class="btn btn-outline">Thought History</a>
+            <a href="{% url 'wellness:psychiatrists' %}" class="btn btn-outline">🏥 Psychiatrists</a>
+            <a href="{% url 'wellness:activities' %}" class="btn btn-outline">🚶 Activities</a>
+        </div>
+        {% if not has_location %}
+        <div class="location-prompt" id="locationPrompt">
+            {% csrf_token %}
+            <p class="location-text">Share your location to get <strong>nearby psychiatrist</strong> suggestions.</p>
+            <button type="button" class="btn btn-secondary" id="shareLocationBtn">Share location</button>
+            <span id="locationStatus" class="location-status"></span>
+        </div>
+        {% endif %}
+    {% else %}
+        <p class="auth-prompt">Please <a href="{% url 'wellness:login' %}">sign in</a> or <a href="{% url 'wellness:signup' %}">sign up</a> to take the survey.</p>
+        <a href="{% url 'wellness:games' %}" class="btn btn-secondary" style="margin-top: 1rem;">🎮 Try Mental Health Games</a>
+    {% endif %}
+</section>
+{% if user.is_authenticated and not has_location %}
+<script>
+(function() {
+    var btn = document.getElementById('shareLocationBtn');
+    var status = document.getElementById('locationStatus');
+    if (!btn || !navigator.geolocation) return;
+    btn.addEventListener('click', function() {
+        btn.disabled = true;
+        status.textContent = 'Getting location…';
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                var form = new FormData();
+                form.append('lat', pos.coords.latitude);
+                form.append('lng', pos.coords.longitude);
+                form.append('city_name', '');
+                form.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                fetch('{% url "wellness:save_location" %}', { method: 'POST', body: form, headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }, credentials: 'same-origin' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.ok) { status.textContent = 'Saved!'; document.getElementById('locationPrompt').querySelector('.location-text').textContent = 'Location saved. You can now see nearby psychiatrists.'; btn.style.display = 'none'; }
+                        else { status.textContent = 'Error'; btn.disabled = false; }
+                    })
+                    .catch(function() { status.textContent = 'Error'; btn.disabled = false; });
+            },
+            function() { status.textContent = 'Location denied or unavailable.'; btn.disabled = false; },
+            { enableHighAccuracy: false, timeout: 8000 }
+        );
+    });
+})();
+</script>
+{% endif %}
+<section class="info">
+    <h2>What we measure</h2>
+    <ul>
+        <li><strong>Mood</strong> — interest, sadness, self-worth</li>
+        <li><strong>Anxiety</strong> — worry, nervousness, control</li>
+        <li><strong>Sleep &amp; energy</strong> — rest and daily energy</li>
+        <li><strong>Concentration</strong> — focus and attention</li>
+        <li><strong>Hopelessness</strong> — thoughts about the future</li>
+        <li><strong>Support</strong> — emotional and social support</li>
+    </ul>
+</section>
+{% endblock %}

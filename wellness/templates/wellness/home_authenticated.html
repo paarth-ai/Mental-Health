@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Welcome Section with Quote -->
+<section class="welcome-hero">
+    <div class="welcome-content">
+        <h1 class="welcome-title">Welcome back, <span class="username-highlight">{{ username }}</span>! 🌸</h1>
+        <blockquote class="welcome-quote">
+            "Your mental health is a priority, not a luxury. Taking time for yourself is an act of self-love."
+        </blockquote>
+        <p class="welcome-hint">Let's continue your wellness journey together.</p>
+    </div>
+</section>
+
+<!-- Latest Survey Status -->
+{% if latest_survey %}
+<section class="latest-survey-section">
+    <div class="survey-card">
+        <h2>📊 Your Latest Survey</h2>
+        <div class="survey-info">
+            <p><strong>Date:</strong> {{ latest_survey.created_at|date:"F d, Y" }}</p>
+            <p><strong>Risk Level:</strong> <span class="risk-badge risk-{{ latest_survey.risk_level }}">{{ latest_survey.risk_level|title }}</span></p>
+            <p><strong>Score:</strong> {{ latest_survey.total_score }}</p>
+        </div>
+        <a href="{% url 'wellness:results' latest_survey.id %}" class="btn btn-secondary">View Details</a>
+    </div>
+</section>
+{% endif %}
+
+<!-- Quick Actions -->
+<section class="quick-actions-section">
+    <h2>What would you like to do?</h2>
+    <p class="section-subtitle">Choose an activity to get started on your wellness journey</p>
+    
+    <div class="actions-grid">
+        <a href="{% url 'wellness:survey' %}" class="action-card action-survey">
+            <div class="card-header">
+                <div class="action-icon">📋</div>
+                <h3>Take Survey</h3>
+            </div>
+            <div class="card-body">
+                <p class="action-description">Complete a wellness assessment</p>
+                <ul class="action-benefits">
+                    <li>Identify emotional patterns</li>
+                    <li>Get personalized recommendations</li>
+                    <li>Track your mental health progress</li>
+                </ul>
+                <span class="action-cta">Start Survey →</span>
+            </div>
+        </a>
+
+        <a href="{% url 'wellness:thought_journal' %}" class="action-card action-journal">
+            <div class="card-header">
+                <div class="action-icon">✍️</div>
+                <h3>Write Thoughts</h3>
+            </div>
+            <div class="card-body">
+                <p class="action-description">Express and reflect on your feelings</p>
+                <ul class="action-benefits">
+                    <li>Process emotions through writing</li>
+                    <li>Build self-awareness</li>
+                    <li>Create a personal wellness journal</li>
+                </ul>
+                <span class="action-cta">Start Writing →</span>
+            </div>
+        </a>
+
+        <a href="{% url 'wellness:games' %}" class="action-card action-games">
+            <div class="card-header">
+                <div class="action-icon">🎮</div>
+                <h3>Mental Games</h3>
+            </div>
+            <div class="card-body">
+                <p class="action-description">Relax and exercise your mind</p>
+                <ul class="action-benefits">
+                    <li>Reduce stress with fun activities</li>
+                    <li>Improve focus and concentration</li>
+                    <li>Take mindful mental breaks</li>
+                </ul>
+                <span class="action-cta">Play Games →</span>
+            </div>
+        </a>
+
+        <a href="{% url 'wellness:my_suggestions' %}" class="action-card action-doctors">
+            <div class="card-header">
+                <div class="action-icon">💊</div>
+                <h3>Doctor's Suggestions</h3>
+            </div>
+            <div class="card-body">
+                <p class="action-description">View your doctor's recovery recommendations</p>
+                <ul class="action-benefits">
+                    <li>See personalized treatment advice</li>
+                    <li>Follow recovery steps</li>
+                    <li>Stay on track with your wellness</li>
+                </ul>
+                <span class="action-cta">View Suggestions →</span>
+            </div>
+        </a>
+
+        <a href="{% url 'wellness:psychiatrists' %}" class="action-card action-doctors">
+            <div class="card-header">
+                <div class="action-icon">🏥</div>
+                <h3>Find Help</h3>
+            </div>
+            <div class="card-body">
+                <p class="action-description">Connect with mental health professionals</p>
+                <ul class="action-benefits">
+                    <li>Find nearby psychiatrists and therapists</li>
+                    <li>Get professional support</li>
+                    <li>Access specialized care</li>
+                </ul>
+                <span class="action-cta">Find Professionals →</span>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- Indoor Activities -->
+{% if indoor_activities %}
+<section class="indoor-activities-section">
+    <div class="section-header">
+        <h2>🏠 Indoor Activities for Today</h2>
+        <p class="section-hint">Quick wellness activities you can do at home</p>
+    </div>
+    <div class="activities-grid">
+        {% for activity in indoor_activities %}
+        <div class="activity-card activity-card-{{ activity.intensity }}" 
+             data-activity-id="{{ activity.id }}"
+             data-name="{{ activity.name }}"
+             data-intensity="{{ activity.get_intensity_display }}"
+             data-duration="{{ activity.duration_suggestion|default:'—' }}"
+             data-duration-minutes="{{ activity.timer_duration|default:activity.duration_minutes }}"
+             data-description="{{ activity.description|default:'A great indoor activity to boost your wellness.' }}"
+             data-icon="{{ activity.icon|default:'🏠' }}"
+             data-image="{{ activity.image_url|default:'' }}"
+             role="button"
+             tabindex="0">
+            <div class="activity-card-inner">
+                {% if activity.image_url %}
+                <div class="activity-image" style="background-image: url('{{ activity.image_url }}')"></div>
+                {% else %}
+                <div class="activity-color-bar intensity-{{ activity.intensity }}"></div>
+                {% endif %}
+                <div class="activity-icon">{{ activity.icon|default:"🏠" }}</div>
+                <h3>{{ activity.name }}</h3>
+                <p class="intensity intensity-{{ activity.intensity }}">{{ activity.get_intensity_display }}</p>
+                {% if activity.duration_suggestion %}<p class="duration">⏱ {{ activity.duration_suggestion }}</p>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'wellness:activities' %}" class="btn btn-outline" style="margin-top: 1rem;">View All Activities →</a>
+</section>
+{% endif %}
+
+<!-- More Features -->
+<section class="more-features-section">
+    <h2>Explore More</h2>
+    <div class="features-grid">
+        <a href="{% url 'wellness:survey_history' %}" class="feature-card">
+            <div class="feature-icon">📚</div>
+            <h3>Survey History</h3>
+            <p>Track your wellness progress over time</p>
+        </a>
+        <a href="{% url 'wellness:thought_history' %}" class="feature-card">
+            <div class="feature-icon">🔖</div>
+            <h3>Thought Journal</h3>
+            <p>Review past reflections and insights</p>
+        </a>
+        <a href="{% url 'wellness:activities' %}" class="feature-card">
+            <div class="feature-icon">🚶</div>
+            <h3>Outdoor Activities</h3>
+            <p>Discover activities based on your energy level</p>
+        </a>
+    </div>
+</section>
+
+<!-- Activity Modal (same as activities.html) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('modal-overlay');
+    const content = document.getElementById('modalContent');
+    const closeBtn = overlay?.querySelector('.modal-close');
+    let timerInterval = null;
+    let timeRemaining = 0;
+    let currentActivityId = null;
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function openModal(data) {
+        if (!overlay || !content) return;
+        currentActivityId = data.activityId;
+        const imgHtml = data.image 
+            ? `<div class="activity-modal-image" style="background-image: url('${data.image}')"></div>`
+            : `<div class="activity-modal-icon">${data.icon}</div>`;
+        
+        const durationMinutes = parseInt(data.durationMinutes) || 30;
+        const initialTime = formatTime(durationMinutes * 60);
+
+        content.innerHTML = `
+            ${imgHtml}
+            <h2 class="activity-modal-title">${data.name}</h2>
+            <p class="activity-modal-meta">${data.intensity} intensity · ${data.duration}</p>
+            <p class="activity-modal-desc">${data.description}</p>
+            
+            <div class="activity-timer-section">
+                <h3>⏱ Activity Timer</h3>
+                <div class="timer-display" id="timer-display">${initialTime}</div>
+                <div class="timer-duration-control">
+                    <label for="timer-duration-input">Duration (minutes):</label>
+                    <input type="number" id="timer-duration-input" min="1" max="300" value="${durationMinutes}" class="duration-input">
+                </div>
+                <div class="timer-controls">
+                    <button id="timer-start" class="btn btn-primary">Start</button>
+                    <button id="timer-reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+            
+            <div class="activity-modal-tips">
+                <strong>Tips:</strong> Start gradually. Take breaks. Enjoy the activity!
+            </div>
+        `;
+        overlay.setAttribute('aria-hidden', 'false');
+
+        const durationInput = document.getElementById('timer-duration-input');
+        const startBtn = document.getElementById('timer-start');
+        const resetBtn = document.getElementById('timer-reset');
+
+        durationInput.addEventListener('change', function() {
+            const newDuration = parseInt(this.value) || durationMinutes;
+            if (newDuration > 0 && newDuration <= 300) {
+                const newTime = formatTime(newDuration * 60);
+                document.getElementById('timer-display').textContent = newTime;
+            }
+        });
+
+        startBtn.onclick = () => {
+            const currentDuration = parseInt(durationInput.value) || durationMinutes;
+            if (timerInterval) clearInterval(timerInterval);
+            timeRemaining = currentDuration * 60;
+            const timerDisplay = document.getElementById('timer-display');
+            startBtn.textContent = 'Pause';
+            durationInput.disabled = true;
+
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = '00:00';
+                    startBtn.textContent = 'Start';
+                    durationInput.disabled = false;
+                    alert('✓ Activity time completed! Great job!');
+                } else {
+                    timeRemaining--;
+                    timerDisplay.textContent = formatTime(timeRemaining);
+                }
+            }, 1000);
+        };
+
+        resetBtn.onclick = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            const currentDuration = parseInt(durationInput.value) || durationMinutes;
+            document.getElementById('timer-display').textContent = formatTime(currentDuration * 60);
+            document.getElementById('timer-start').textContent = 'Start';
+            durationInput.disabled = false;
+            timeRemaining = 0;
+        };
+    }
+
+    function closeModal() {
+        if (timerInterval) clearInterval(timerInterval);
+        if (overlay) overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    document.querySelectorAll('.activity-card').forEach(card => {
+        card.addEventListener('click', () => {
+            openModal({
+                activityId: parseInt(card.dataset.activityId),
+                name: card.dataset.name,
+                intensity: card.dataset.intensity,
+                duration: card.dataset.duration,
+                durationMinutes: card.dataset.durationMinutes,
+                description: card.dataset.description,
+                icon: card.dataset.icon,
+                image: card.dataset.image
+            });
+        });
+        card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+            }
+        });
+    });
+
+    closeBtn?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', e => {
+        if (e.target === overlay) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+});
+</script>
+
+{% endblock %}

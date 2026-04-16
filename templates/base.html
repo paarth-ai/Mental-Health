@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default:"Mental Wellness Check" }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <aside class="sidebar">
+        <a href="{% if is_doctor %}{% url 'wellness:doctor_dashboard' %}{% else %}{% url 'wellness:home' %}{% endif %}" class="sidebar-logo">
+            <span class="logo-icon">🌸</span>
+            <span class="logo-text">Mental Wellness</span>
+        </a>
+        <nav class="sidebar-nav">
+            {% if is_doctor %}
+                <a href="{% url 'wellness:doctor_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'doctor_dashboard' %}active{% endif %}">
+                    <span class="nav-icon">🏠</span> Doctor Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'wellness:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <span class="nav-icon">🏠</span> Home
+                </a>
+                <a href="{% url 'wellness:games' %}" class="nav-link {% if request.resolver_match.url_name == 'games' %}active{% endif %}">
+                    <span class="nav-icon">🎮</span> Games & Activities
+                </a>
+                <a href="{% url 'wellness:survey' %}" class="nav-link {% if request.resolver_match.url_name == 'survey' %}active{% endif %}">
+                    <span class="nav-icon">📋</span> Take Survey
+                </a>
+                <a href="{% url 'wellness:survey_history' %}" class="nav-link {% if request.resolver_match.url_name == 'survey_history' %}active{% endif %}">
+                    <span class="nav-icon">📊</span> Survey History
+                </a>
+                <a href="{% url 'wellness:thought_journal' %}" class="nav-link {% if request.resolver_match.url_name == 'thought_journal' %}active{% endif %}">
+                    <span class="nav-icon">✍️</span> Write Thoughts
+                </a>
+                <a href="{% url 'wellness:thought_history' %}" class="nav-link {% if request.resolver_match.url_name == 'thought_history' %}active{% endif %}">
+                    <span class="nav-icon">📖</span> Thought History
+                </a>
+                <a href="{% url 'wellness:my_suggestions' %}" class="nav-link {% if request.resolver_match.url_name == 'my_suggestions' %}active{% endif %}">
+                    <span class="nav-icon">💊</span> Doctor's Suggestions
+                </a>
+                <a href="{% url 'wellness:psychiatrists' %}" class="nav-link {% if request.resolver_match.url_name == 'psychiatrists' %}active{% endif %}">
+                    <span class="nav-icon">🏥</span> Psychiatrists
+                </a>
+                <a href="{% url 'wellness:activities' %}" class="nav-link {% if request.resolver_match.url_name == 'activities' %}active{% endif %}">
+                    <span class="nav-icon">🚶</span> Outdoor Activities
+                </a>
+            {% endif %}
+        </nav>
+        <div class="sidebar-footer">
+            <p>Confidential screening only. Not a diagnosis.</p>
+        </div>
+    </aside>
+    {% endif %}
+    <div class="page-wrapper {% if not user.is_authenticated %}no-sidebar{% endif %}">
+        {% if user.is_authenticated %}
+        <header class="topbar">
+            <div class="topbar-user">
+                <span class="user-avatar">👤</span>
+                <span class="username">{{ user.username }}</span>
+            </div>
+            <form method="post" action="{% url 'wellness:logout' %}" class="topbar-logout-form">
+                {% csrf_token %}
+                <button type="submit" class="nav-link nav-logout-btn"><span class="nav-icon">🚪</span> Logout</button>
+            </form>
+        </header>
+        {% endif %}
+        <main class="main-content">
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="site-footer">
+            <p>This tool is for screening only and does not replace professional care. If you are in crisis, please contact a crisis line or emergency services.</p>
+        </footer>
+    </div>
+    <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true">
+            <button type="button" class="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-content" id="modalContent"></div>
+        </div>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

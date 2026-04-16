@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-page auth-page-styled">
+    <div class="auth-bg-pattern"></div>
+    <div class="auth-form-wrapper">
+        <h1>Patient Sign Up</h1>
+        <p class="intro">Create an account to use the wellness check. Sharing your location helps us suggest nearby psychiatrists.</p>
+
+        <form method="post" action="{% url 'wellness:signup' %}" class="auth-form auth-form-aligned">
+            {% csrf_token %}
+            <input type="hidden" name="lat" id="lat" value="">
+            <input type="hidden" name="lng" id="lng" value="">
+            <input type="hidden" name="city_name" id="city_name" value="">
+            {% for field in form %}
+            <div class="form-group form-group-aligned">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<span class="help-text">{{ field.help_text }}</span>{% endif %}
+                {% if field.errors %}<span class="error">{{ field.errors.0 }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </div>
+        </form>
+
+        <p class="auth-footer">
+            Already have an account? <a href="{% url 'wellness:login' %}">Sign in</a> •
+            <a href="{% url 'wellness:auth' %}">Back to welcome</a>
+        </p>
+    </div>
+</section>
+<script>
+(function() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            document.getElementById('lat').value = pos.coords.latitude;
+            document.getElementById('lng').value = pos.coords.longitude;
+        }, function() {}, { enableHighAccuracy: false, timeout: 5000 }
+    );
+})();
+</script>
+{% endblock %}

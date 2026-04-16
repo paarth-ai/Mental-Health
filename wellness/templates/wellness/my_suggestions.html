@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="my-suggestions-page">
+    <div class="page-hero">
+        <h1>Doctor's Suggestions for You</h1>
+        <p class="intro">Here are the recovery recommendations from your doctor. Follow these for your treatment.</p>
+    </div>
+
+    {% if suggestions %}
+    <ul class="suggestions-list-patient">
+        {% for s in suggestions %}
+        <li class="suggestion-card-patient">
+            <div class="suggestion-header">
+                <span class="doctor-name">Dr. {{ s.doctor.full_name }}</span>
+                <span class="suggestion-date">{{ s.created_at|date:"F d, Y" }}</span>
+            </div>
+            <div class="suggestion-content">
+                {{ s.suggestion|linebreaks }}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">💊</div>
+        <h2>No Suggestions Yet</h2>
+        <p>Your doctor hasn't added any suggestions yet. Complete your surveys and write thoughts so your doctor can provide personalized recommendations.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

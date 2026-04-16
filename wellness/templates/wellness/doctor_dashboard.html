@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="doctor-dashboard-page">
+    <div class="page-hero">
+        <h1>Doctor Dashboard</h1>
+        <p class="intro">View your patients' wellness data, thoughts, and provide recovery suggestions.</p>
+    </div>
+
+    {% if patients_data %}
+    <div class="patients-grid">
+        {% for item in patients_data %}
+        <a href="{% url 'wellness:doctor_patient_detail' item.user.id %}" class="patient-card">
+            <div class="patient-card-header">
+                <span class="patient-avatar">👤</span>
+                <h3>{{ item.user.username }}</h3>
+            </div>
+            <div class="patient-stats">
+                <span class="stat"><strong>{{ item.thought_count }}</strong> thoughts</span>
+                <span class="stat"><strong>{{ item.suggestion_count }}</strong> suggestions</span>
+            </div>
+            {% if item.latest_survey %}
+            <div class="patient-survey-info">
+                <span class="risk-badge risk-{{ item.latest_survey.risk_level }}">{{ item.latest_survey.risk_level|title }}</span>
+                <span class="survey-date">Last survey: {{ item.latest_survey.created_at|date:"M d, Y" }}</span>
+            </div>
+            {% else %}
+            <p class="no-survey">No survey yet</p>
+            {% endif %}
+            <span class="view-link">View Details →</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h2>No Patients Assigned</h2>
+        <p>The administrator needs to assign patients to you. Ask your admin to go to Django Admin → Patient-Doctor Assignments and add assignments.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

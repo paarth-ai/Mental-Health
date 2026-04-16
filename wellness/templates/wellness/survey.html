@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="survey-page">
+    <h1>Wellness Survey</h1>
+    <p class="intro">Over the last two weeks, how often have you been bothered by the following? Choose one option for each question.</p>
+
+    <form method="post" action="{% url 'wellness:survey' %}" class="survey-form">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label class="survey-question-label">{{ field.label }}</label>
+            <div class="radio-group survey-options" role="group" aria-label="{{ field.label }}">
+                {% for choice in field.field.choices %}
+                <label class="radio-label survey-option">
+                    <input type="radio" name="{{ field.name }}" value="{{ choice.0 }}" required>
+                    <span class="option-text">{{ choice.1 }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if field.errors %}<span class="error">{{ field.errors.0 }}</span>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">See Results</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

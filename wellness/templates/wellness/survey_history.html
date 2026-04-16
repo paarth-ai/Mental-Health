@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="results-page">
+    <h1>My Survey History</h1>
+    <p class="intro">Your previously saved survey results. Click a date to see full details.</p>
+
+    {% if responses %}
+    <ul class="survey-history-list">
+        {% for r in responses %}
+        <li class="survey-history-item">
+            <a href="{% url 'wellness:results' r.id %}" class="survey-history-link">
+                <span class="survey-date">{{ r.created_at|date:"M d, Y" }}</span>
+                <span class="survey-score">Score: {{ r.total_score }}</span>
+                <span class="risk-badge risk-{{ r.risk_level }}">{{ r.risk_level|title }}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="no-results">You haven't completed any surveys yet. <a href="{% url 'wellness:survey' %}">Take the survey</a> to see your results here.</p>
+    {% endif %}
+
+    <p class="next-steps">
+        <a href="{% url 'wellness:survey' %}" class="btn btn-primary">Take survey again</a>
+        <a href="{% url 'wellness:home' %}" class="btn btn-outline">Back to home</a>
+    </p>
+</section>
+{% endblock %}

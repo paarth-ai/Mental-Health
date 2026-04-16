@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="thought-journal-page">
+    <div class="page-hero">
+        <h1>✍️ Write Your Thoughts</h1>
+        <p class="intro">Express yourself. Your thoughts are saved securely and you can read them anytime in your Thought History.</p>
+    </div>
+    <div class="thought-journal-card">
+        <form method="post" action="{% url 'wellness:thought_journal' %}" class="thought-form">
+            {% csrf_token %}
+            <textarea name="content" id="thoughtContent" placeholder="Write whatever is on your mind... Your feelings, reflections, gratitude, worries, or ideas. This is your private space." rows="10" required></textarea>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Thought</button>
+                <a href="{% url 'wellness:thought_history' %}" class="btn btn-outline">View My History</a>
+            </div>
+        </form>
+        <p class="thought-tip">💡 Tip: Writing regularly helps process emotions and track your mental wellness over time.</p>
+    </div>
+</section>
+{% endblock %}

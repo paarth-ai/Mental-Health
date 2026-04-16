@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="activities-page">
+    <div class="page-hero">
+        <h1>🚶 Outdoor Physical Activities</h1>
+        <p class="intro">
+            Moving outdoors can improve mood, energy, and sleep. <strong>Click any activity</strong> to see more details and tips.
+            {% if has_survey %} Suggestions are based on your latest survey (energy and mood).{% endif %}
+        </p>
+    </div>
+
+    <div class="activities-grid">
+        {% for a in activities %}
+        <div class="activity-card activity-card-{{ a.intensity }} {% if a.suggested %}suggested{% endif %}" 
+             data-activity-id="{{ a.id }}"
+             data-name="{{ a.name }}"
+             data-intensity="{{ a.get_intensity_display }}"
+             data-duration="{{ a.duration_suggestion|default:'—' }}"
+             data-duration-minutes="{{ a.timer_duration|default:a.duration_minutes }}"
+             data-description="{{ a.description|default:'A great outdoor activity to boost your wellness.' }}"
+             data-icon="{{ a.icon|default:'🌿' }}"
+             data-image="{{ a.image_url|default:'' }}"
+             role="button"
+             tabindex="0">
+            <div class="activity-card-inner">
+                {% if a.image_url %}
+                <div class="activity-image" style="background-image: url('{{ a.image_url }}')"></div>
+                {% else %}
+                <div class="activity-color-bar intensity-{{ a.intensity }}"></div>
+                {% endif %}
+                <div class="activity-icon">{{ a.icon|default:"🌿" }}</div>
+                <h2>{{ a.name }}</h2>
+                <p class="intensity intensity-{{ a.intensity }}">{{ a.get_intensity_display }} intensity</p>
+                {% if a.duration_suggestion %}<p class="duration">⏱ {{ a.duration_suggestion }}</p>{% endif %}
+                {% if a.suggested %}<span class="suggested-badge">Suggested for you</span>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="activities-extra">
+        <div class="info-card">
+            <h3>💡 Why outdoor activities help</h3>
+            <p>Sunlight supports vitamin D and circadian rhythm. Nature reduces stress hormones. Movement releases endorphins.</p>
+        </div>
+    </div>
+
+    <p class="next-steps">
+        <a href="{% url 'wellness:survey' %}" class="btn btn-secondary">Take survey</a>
+        <a href="{% url 'wellness:home' %}" class="btn btn-outline">Back to home</a>
+    </p>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('modal-overlay');
+    const content = document.getElementById('modalContent');
+    const closeBtn = overlay?.querySelector('.modal-close');
+    let timerInterval = null;
+    let timeRemaining = 0;
+    let currentActivityId = null;
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function saveActivityPreference(activityId, durationMinutes) {
+        fetch('{% url "wellness:save_activity_preference" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+            },
+            body: JSON.stringify({
+                activity_id: activityId,
+                duration_minutes: durationMinutes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('✓ Preference saved:', data.message);
+            } else {
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => console.error('Save failed:', error));
+    }
+
+    function startTimer(minutes) {
+        timeRemaining = minutes * 60;
+        const timerDisplay = document.getElementById('timer-display');
+        const startBtn = document.getElementById('timer-start');
+        const resetBtn = document.getElementById('timer-reset');
+        const durationInput = document.getElementById('timer-duration-input');
+
+        if (timerInterval) clearInterval(timerInterval);
+
+        startBtn.textContent = 'Pause';
+        durationInput.disabled = true;
+
+        startBtn.onclick = () => {
+            clearInterval(timerInterval);
+            startBtn.textContent = 'Resume';
+            durationInput.disabled = false;
+            startBtn.onclick = () => startTimer(timeRemaining / 60);
+        };
+
+        resetBtn.onclick = () => {
+            clearInterval(timerInterval);
+            timeRemaining = minutes * 60;
+            timerDisplay.textContent = formatTime(timeRemaining);
+            startBtn.textContent = 'Start';
+            durationInput.disabled = false;
+            startBtn.onclick = () => startTimer(minutes);
+        };
+
+        timerInterval = setInterval(() => {
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = '00:00';
+                startBtn.textContent = 'Start';
+                durationInput.disabled = false;
+                startBtn.onclick = () => startTimer(minutes);
+                alert('✓ Activity time completed! Great job!');
+            } else {
+                timeRemaining--;
+                timerDisplay.textContent = formatTime(timeRemaining);
+            }
+        }, 1000);
+    }
+
+    function openModal(data) {
+        if (!overlay || !content) return;
+        currentActivityId = data.activityId;
+        const imgHtml = data.image 
+            ? `<div class="activity-modal-image" style="background-image: url('${data.image}')"></div>`
+            : `<div class="activity-modal-icon">${data.icon}</div>`;
+        
+        const durationMinutes = parseInt(data.durationMinutes) || 30;
+        const initialTime = formatTime(durationMinutes * 60);
+
+        content.innerHTML = `
+            ${imgHtml}
+            <h2 class="activity-modal-title">${data.name}</h2>
+            <p class="activity-modal-meta">${data.intensity} intensity · ${data.duration}</p>
+            <p class="activity-modal-desc">${data.description}</p>
+            
+            <div class="activity-timer-section">
+                <h3>⏱ Activity Timer</h3>
+                <div class="timer-display" id="timer-display">${initialTime}</div>
+                <div class="timer-duration-control">
+                    <label for="timer-duration-input">Duration (minutes):</label>
+                    <input type="number" id="timer-duration-input" min="1" max="300" value="${durationMinutes}" class="duration-input">
+                </div>
+                <div class="timer-controls">
+                    <button id="timer-start" class="btn btn-primary">Start</button>
+                    <button id="timer-reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+            
+            <div class="activity-modal-tips">
+                <strong>Tips:</strong> Start gradually. Stay hydrated. Enjoy the outdoors!
+            </div>
+        `;
+        overlay.setAttribute('aria-hidden', 'false');
+
+        const durationInput = document.getElementById('timer-duration-input');
+        const startBtn = document.getElementById('timer-start');
+        const resetBtn = document.getElementById('timer-reset');
+
+        // Save preference when input changes
+        durationInput.addEventListener('change', function() {
+            const newDuration = parseInt(this.value) || durationMinutes;
+            if (newDuration > 0 && newDuration <= 300) {
+                saveActivityPreference(currentActivityId, newDuration);
+                // Update initial time
+                const newTime = formatTime(newDuration * 60);
+                document.getElementById('timer-display').textContent = newTime;
+            }
+        });
+
+        startBtn.onclick = () => {
+            const currentDuration = parseInt(durationInput.value) || durationMinutes;
+            startTimer(currentDuration);
+        };
+
+        resetBtn.onclick = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            const currentDuration = parseInt(durationInput.value) || durationMinutes;
+            document.getElementById('timer-display').textContent = formatTime(currentDuration * 60);
+            document.getElementById('timer-start').textContent = 'Start';
+            durationInput.disabled = false;
+            timeRemaining = 0;
+        };
+    }
+
+    function closeModal() {
+        if (timerInterval) clearInterval(timerInterval);
+        if (overlay) overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    document.querySelectorAll('.activity-card').forEach(card => {
+        card.addEventListener('click', () => {
+            openModal({
+                activityId: parseInt(card.dataset.activityId),
+                name: card.dataset.name,
+                intensity: card.dataset.intensity,
+                duration: card.dataset.duration,
+                durationMinutes: card.dataset.durationMinutes,
+                description: card.dataset.description,
+                icon: card.dataset.icon,
+                image: card.dataset.image
+            });
+        });
+        card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+            }
+        });
+    });
+
+    closeBtn?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', e => {
+        if (e.target === overlay) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+});
+</script>
+{% endblock %}

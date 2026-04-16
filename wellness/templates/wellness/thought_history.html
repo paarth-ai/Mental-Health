@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="thought-history-page">
+    <div class="page-hero">
+        <h1>📖 My Thought History</h1>
+        <p class="intro">Your saved thoughts. Read them anytime to reflect on your journey.</p>
+    </div>
+    <div class="thought-actions">
+        <a href="{% url 'wellness:thought_journal' %}" class="btn btn-primary">Write New Thought</a>
+    </div>
+    {% if entries %}
+    <ul class="thought-list">
+        {% for entry in entries %}
+        <li class="thought-card">
+            <div class="thought-date">{{ entry.created_at|date:"M d, Y · g:i A" }}</div>
+            <p class="thought-content">{{ entry.content }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-icon">📝</p>
+        <p>You haven't written any thoughts yet.</p>
+        <a href="{% url 'wellness:thought_journal' %}" class="btn btn-primary">Start Writing</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="results-page">
+    <h1>Your Results</h1>
+
+    <div class="score-card">
+        <div class="score-main">
+            <span class="score-value">{{ response.total_score }}</span>
+            <span class="score-label">Total score</span>
+        </div>
+        <div class="risk-badge risk-{{ response.risk_level }}">
+            {{ risk_label }}
+        </div>
+    </div>
+
+    <div class="score-interpretation">
+        <h2>Interpretation</h2>
+        <p>Your total score of <strong>{{ response.total_score }}</strong> falls in the "<strong>{{ risk_label }}</strong>" range (<strong>{{ score_range }}</strong>).
+        {{ score_description }}</p>
+    </div>
+
+    <div class="dashboard-charts">
+        <h2>Score overview</h2>
+        <p class="chart-hint">Hover over segments or bars to see exact scores.</p>
+        <div class="charts-row">
+            <div class="chart-wrap chart-wrap-radar">
+                <canvas id="radarChart" aria-label="Radar chart of category scores"></canvas>
+            </div>
+            <div class="chart-wrap chart-wrap-bar">
+                <canvas id="barChart" aria-label="Bar chart of category scores"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-scores">
+        <h2>By area</h2>
+        <ul>
+            <li>Mood: <strong>{{ response.mood_score }}</strong> / {{ category_maxes.mood }} ({{ category_percents.mood }}%)</li>
+            <li>Anxiety: <strong>{{ response.anxiety_score }}</strong> / {{ category_maxes.anxiety }} ({{ category_percents.anxiety }}%)</li>
+            <li>Sleep: <strong>{{ response.sleep_score }}</strong> / {{ category_maxes.sleep }} ({{ category_percents.sleep }}%)</li>
+            <li>Energy: <strong>{{ response.energy_score }}</strong> / {{ category_maxes.energy }} ({{ category_percents.energy }}%)</li>
+            <li>Concentration: <strong>{{ response.concentration_score }}</strong> / {{ category_maxes.concentration }} ({{ category_percents.concentration }}%)</li>
+            <li>Hopelessness: <strong>{{ response.hopelessness_score }}</strong> / {{ category_maxes.hopelessness }} ({{ category_percents.hopelessness }}%)</li>
+            <li>Support: <strong>{{ response.support_score }}</strong> / {{ category_maxes.support }} ({{ category_percents.support }}%)</li>
+        </ul>
+    </div>
+
+    <div class="recommendation">
+        <h2>Recommendation</h2>
+        <p>{{ response.recommendation }}</p>
+    </div>
+
+    <div class="recommendation-actions">
+        <h2>Next steps</h2>
+        <p>Consider speaking with a professional or trying outdoor activities to support your wellbeing.</p>
+        <p class="next-steps">
+            <a href="{% url 'wellness:psychiatrists' %}" class="btn btn-primary">Find nearby psychiatrists</a>
+            <a href="{% url 'wellness:activities' %}" class="btn btn-secondary">Outdoor activities</a>
+            <a href="{% url 'wellness:survey_history' %}" class="btn btn-outline">My survey history</a>
+            <a href="{% url 'wellness:survey' %}" class="btn btn-outline">Take survey again</a>
+            <a href="{% url 'wellness:home' %}" class="btn btn-outline">Back to home</a>
+        </p>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    var labels = ['Mood', 'Anxiety', 'Sleep', 'Energy', 'Concentration', 'Hopelessness', 'Support'];
+    var scores = [
+        {{ response.mood_score }},
+        {{ response.anxiety_score }},
+        {{ response.sleep_score }},
+        {{ response.energy_score }},
+        {{ response.concentration_score }},
+        {{ response.hopelessness_score }},
+        {{ response.support_score }}
+    ];
+    var maxes = [
+        {{ category_maxes.mood }},
+        {{ category_maxes.anxiety }},
+        {{ category_maxes.sleep }},
+        {{ category_maxes.energy }},
+        {{ category_maxes.concentration }},
+        {{ category_maxes.hopelessness }},
+        {{ category_maxes.support }}
+    ];
+    var tooltipLabel = function(ctx) {
+        var i = ctx.dataIndex;
+        return labels[i] + ': ' + scores[i] + ' / ' + maxes[i] + ' (' + Math.round((scores[i] / maxes[i]) * 100) + '%)';
+    };
+
+    new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Score',
+                data: scores,
+                fill: true,
+                backgroundColor: 'rgba(61, 107, 124, 0.2)',
+                borderColor: 'rgb(61, 107, 124)',
+                pointBackgroundColor: 'rgb(61, 107, 124)',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(61, 107, 124)'
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    min: 0,
+                    max: Math.max.apply(null, maxes)
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var i = ctx.dataIndex;
+                            return 'Score: ' + scores[i] + ' / ' + maxes[i] + ' (' + Math.round((scores[i] / maxes[i]) * 100) + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Score',
+                data: scores,
+                backgroundColor: 'rgba(61, 107, 124, 0.7)',
+                borderColor: 'rgb(61, 107, 124)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: Math.max.apply(null, maxes)
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var i = ctx.dataIndex;
+                            return 'Score: ' + scores[i] + ' / ' + maxes[i] + ' (' + Math.round((scores[i] / maxes[i]) * 100) + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+})();
+</script>
+{% endblock %}
