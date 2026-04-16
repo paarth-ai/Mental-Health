@@ -20,8 +20,15 @@ try:
     call_command('migrate', verbosity=2)
     print("✓ Migrations completed successfully")
 except Exception as e:
-    print(f"⚠ Migration error: {e}")
-    # Don't fail the build on migration errors
+    print(f"⚠ Migration warning: {e}")
+    # Continue even if migrations fail
+
+# Create superuser if needed (for development)
+if os.environ.get('VERCEL'):
+    print("\nNote: Using SQLite on Vercel (ephemeral). For production, set up Vercel Postgres:")
+    print("  1. Go to Vercel Dashboard > Storage")
+    print("  2. Create PostgreSQL database")
+    print("  3. Add DATABASE_URL to environment variables")
 
 # Collect static files
 print("\nCollecting static files...")
@@ -29,5 +36,5 @@ try:
     call_command('collectstatic', '--noinput', verbosity=2)
     print("✓ Static files collected successfully")
 except Exception as e:
-    print(f"⚠ Static files collection error: {e}")
-    # Don't fail the build on static files errors
+    print(f"⚠ Static files warning: {e}")
+
