@@ -1,0 +1,22 @@
+{
+  "buildCommand": "pip install -r requirements.txt && python build.py",
+  "builds": [
+    {
+      "src": "mental_health_survey/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/staticfiles/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "mental_health_survey/wsgi.py"
+    }
+  ],
+  "env": {
+    "DEBUG": "False"
+  }
+}
