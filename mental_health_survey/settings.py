@@ -13,9 +13,15 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-production-mental-health-survey')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '*.vercel.app',
+    'mental-health-mscp.vercel.app',
+    'paarth-ai.github.io',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
